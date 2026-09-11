@@ -67,7 +67,7 @@ const rowId = baseId ? `${baseId}--${contentSlug}` : contentSlug;
 >
   <a
     href={`#${rowId}`}
-    class="issue-badge"
+    class="issue-badge not-prose"
     aria-label={`${label} - permalink to this release note`}
   >
     {label}
@@ -106,12 +106,12 @@ const rowId = baseId ? `${baseId}--${contentSlug}` : contentSlug;
 
   {issue && (
     issueBaseUrl
-      ? <a class="github-link" target="_blank" rel="noopener noreferrer" href={`${issueBaseUrl}${issue}`}>#{issue}</a>
+      ? <a class="github-link not-prose" target="_blank" rel="noopener noreferrer" href={`${issueBaseUrl}${issue}`}>#{issue}</a>
       : <span class="github-link">#{issue}</span>
   )}
   {bonusIssue && (
     issueBaseUrl
-      ? <a class="github-link" target="_blank" rel="noopener noreferrer" href={`${issueBaseUrl}${bonusIssue}`}>#{bonusIssue}</a>
+      ? <a class="github-link not-prose" target="_blank" rel="noopener noreferrer" href={`${issueBaseUrl}${bonusIssue}`}>#{bonusIssue}</a>
       : <span class="github-link">#{bonusIssue}</span>
   )}
 </div>

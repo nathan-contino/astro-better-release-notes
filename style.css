@@ -206,7 +206,7 @@
   transition: border-color 0.2s;
   padding: 6px 8px;
   border: 2px solid transparent;
-  scroll-margin-top: 5rem;
+  scroll-margin-top: var(--release-notes-scroll-margin, 5rem);
 }
 
 @media (min-width: 768px) {
@@ -231,15 +231,22 @@
   text-decoration: none;
   cursor: pointer;
   user-select: none;
-  transition: transform 0.15s ease-out;
+  transition: transform 0.15s ease-out, color 0.15s ease-out;
   transform-origin: left center;
   background-color: color-mix(in srgb, var(--cat-color) 13%, transparent);
   color: var(--cat-color);
   border: 1px solid color-mix(in srgb, var(--cat-color) 27%, transparent);
 }
 
-.issue-badge:hover { transform: scale(1.05); }
+.issue-badge:hover {
+  transform: scale(1.05);
+  color: var(--release-notes-link-hover-color, #9a3412);
+  text-decoration: none;
+}
 .issue-badge:active { transform: scale(0.95); }
+.dark .issue-badge:hover {
+  color: var(--release-notes-link-hover-color-dark, #fed7aa);
+}
 
 .issue-content {
   flex: 1;
@@ -268,19 +275,29 @@
   flex-shrink: 0;
   font-size: 0.875rem;
   text-decoration: none;
-  opacity: 0.7;
-  color: inherit;
+  color: var(--release-notes-link-color, #4338ca);
+  transition: color 0.15s;
 }
 
-.github-link:hover { opacity: 1; text-decoration: underline; }
+.github-link:hover {
+  color: var(--release-notes-link-hover-color, #9a3412);
+  text-decoration: none;
+}
+
+.dark .github-link {
+  color: var(--release-notes-link-color-dark, #818cf8);
+}
+
+.dark .github-link:hover {
+  color: var(--release-notes-link-hover-color-dark, #fed7aa);
+}
 
 /* ---------------------------------------------------------------
    Version articles
 --------------------------------------------------------------- */
 
 .version {
-  content-visibility: auto;
-  contain-intrinsic-size: 0 800px;
+  scroll-margin-top: var(--release-notes-scroll-margin, 5rem);
 }
 
 .version-header {

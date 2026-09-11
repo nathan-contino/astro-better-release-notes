@@ -88,24 +88,41 @@ const rendered = await Promise.all(
 | `components` | `Record<string, any>` | `{}` | Component overrides (e.g. custom `ReleaseNotesItem`) |
 | `showSelector` | `boolean` | `true` | Set `false` to hide the version jump dropdown |
 
-### Sticky offset
+### Sticky offset and scroll margins
 
-The sticky header sticks below your site navigation. Set the `--release-notes-top` CSS custom property to match your nav height:
+Two CSS custom properties control the positioning:
+
+`--release-notes-top` — how far the sticky header sits from the viewport top (should match your site's fixed nav height). Default: `3.5rem`.
+
+`--release-notes-scroll-margin` — the `scroll-margin-top` applied to both version articles and individual release note rows when navigating via anchor links. Should be at least as large as your total sticky height (nav + release-notes sticky header). Default: `5rem`.
 
 ```css
 /* in your root layout or global CSS */
-:root {
-  --release-notes-top: 56px; /* your mobile nav height */
+html {
+  --release-notes-top: 56px;
+  --release-notes-scroll-margin: 6rem; /* nav + sticky header height */
 }
 
 @media (min-width: 1024px) {
-  :root {
-    --release-notes-top: 80px; /* your desktop nav height */
+  html {
+    --release-notes-top: 80px;
+    --release-notes-scroll-margin: 11rem;
   }
 }
 ```
 
-The default is `3.5rem` (56px). Set the variable on `:root`, `html`, or any ancestor of `.release-sticky-header`.
+Set both variables on `html` or any ancestor of `.release-container`.
+
+### Link colors
+
+The github issue links and category badge hover colors are configurable:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `--release-notes-link-color` | `#4338ca` (indigo-700) | Issue link color |
+| `--release-notes-link-hover-color` | `#9a3412` (orange-800) | Hover color for links and badge |
+| `--release-notes-link-color-dark` | `#818cf8` (indigo-400) | Dark mode link color |
+| `--release-notes-link-hover-color-dark` | `#fed7aa` (orange-200) | Dark mode hover color |
 
 ### Mobile filter behavior
 
