@@ -1,0 +1,98 @@
+---
+import ReleaseNotesItem from './ReleaseNotesItem.astro';
+
+export interface Category {
+  id: string;
+  label: string;
+  color: string;
+}
+
+export const DEFAULT_CATEGORIES: Category[] = [
+  { id: 'new-feature',        label: 'New Feature',        color: '#16a34a' },
+  { id: 'enhancement',        label: 'Enhancement',        color: '#2563eb' },
+  { id: 'fix',                label: 'Fix',                color: '#d97706' },
+  { id: 'security',           label: 'Security',           color: '#566f98' },
+  { id: 'deprecated',         label: 'Deprecated',         color: '#ffcc48' },
+  { id: 'breaking-change',    label: 'Breaking Change',    color: '#aaaa33' },
+  { id: 'known-issue',        label: 'Known Issue',        color: '#bb4448' },
+  { id: 'internal',           label: 'Internal',           color: '#71717a' },
+];
+
+export const getCategoryColor = (id: string, categories: Category[]) =>
+  categories.find(c => c.id === id)?.color ?? '#71717a';
+
+export const getCategoryLabel = (id: string, categories: Category[]) => {
+  const cat = categories.find(c => c.id === id);
+  if (cat) return cat.label;
+  return id.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+};
+
+export interface ReleaseEntry {
+  data: {
+    version: string;
+    date: Date;
+    name?: string;
+  };
+  Content: any;
+}
+
+export interface Props {
+  updates: ReleaseEntry[];
+  categories?: Category[];
+  // pass { ReleaseNotesItem: YourWrapper } to inject a custom item component
+  components?: Record<string, any>;
+}
+
+const {
+  updates,
+  categories = DEFAULT_CATEGORIES,
+  components: extraComponents = {},
+} = Astro.props as Props;
+
+const mergedComponents = { ReleaseNotesItem, ...extraComponents };
+
+// generate filter CSS from the configured categories
+const filterCSS = [
+  '.release-container:has(.filter-input:checked) .issue-row { display: none !important; }',
+  ...categories.map(cat =>
+    `.release-container:has(#toggle-${cat.id}:checked) [data-category="${cat.id}"] { display: flex !important; }`
+  ),
+].join('\n');
+---
+
+<Fragment set:html={`<style>${filterCSS}</style>`} />
+
+<div class="release-container">
+  <nav class="filter-controls" aria-label="Filter release notes by category">
+    {categories.map(cat => (
+      <label class="filter-chip" style={`--cat-color: ${cat.color}`}>
+        <input type="checkbox" id={`toggle-${cat.id}`} class="filter-input" aria-label={`Show ${cat.label}`} />
+        <span aria-hidden="true">{cat.label}</span>
+      </label>
+    ))}
+  </nav>
+
+  <div class="version-list">
+    {updates.map((item) => {
+      const { Content } = item;
+      const versionId = `version-${item.data.version.replaceAll('.', '-')}`;
+      return (
+        <article id={versionId} class="version">
+          <header class="version-header">
+            <h2 class="release-note group">
+              Version {item.data.version} {item.data.name && `(${item.data.name})`}
+              <a class="anchor-link" title="copy header link" href={`#${versionId}`} aria-label={`Permalink to version ${item.data.version}`}>#</a>
+            </h2>
+            <time class="version-date" datetime={item.data.date.toISOString()}>
+              {item.data.date.toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })}
+            </time>
+          </header>
+
+          <div class="version-content">
+            <Content components={mergedComponents} />
+          </div>
+        </article>
+      );
+    })}
+  </div>
+</div>

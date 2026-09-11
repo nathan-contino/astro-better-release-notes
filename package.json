@@ -1,0 +1,20 @@
+{
+  "name": "astro-better-release-notes",
+  "version": "0.1.0",
+  "description": "Configurable release notes components with category filtering and version navigation for Astro",
+  "type": "module",
+  "exports": {
+    ".": "./index.js",
+    "./style.css": "./style.css",
+    "./ReleaseNotes.astro": "./ReleaseNotes.astro",
+    "./ReleaseNotesItem.astro": "./ReleaseNotesItem.astro",
+    "./ReleaseNotesSelector.astro": "./ReleaseNotesSelector.astro"
+  },
+  "files": [
+    "*.js",
+    "*.astro",
+    "*.css"
+  ],
+  "keywords": ["astro", "release-notes", "changelog", "filter", "categories"],
+  "license": "MIT"
+}

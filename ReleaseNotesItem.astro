@@ -1,0 +1,117 @@
+---
+export interface Props {
+  category: string;
+  issue?: string;
+  bonusIssue?: string;
+  thanks?: string;
+  bonusThanks?: string;
+  since?: string;
+  resolvedIn?: string;
+  viaIssue?: string;
+  // base URL for issue links, e.g. "https://github.com/org/repo/issues/"
+  // if omitted, issue numbers are shown as plain text
+  issueBaseUrl?: string;
+  // color for this item's badge; if omitted, uses a neutral gray
+  categoryColor?: string;
+  // human-readable category label; if omitted, generated from id
+  categoryLabel?: string;
+}
+
+const {
+  category = 'fix',
+  issue,
+  bonusIssue,
+  thanks,
+  bonusThanks,
+  since,
+  resolvedIn,
+  viaIssue,
+  issueBaseUrl = '',
+  categoryColor = '#71717a',
+  categoryLabel,
+} = Astro.props as Props;
+
+const label = categoryLabel
+  ?? category.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+const versionPart = resolvedIn
+  ? `v-${resolvedIn.replaceAll('.', '-')}`
+  : (since ? `since-${since.replaceAll('.', '-')}` : '');
+
+const issuePart = issue
+  ? `issue-${issue}`
+  : (viaIssue ? `via-${viaIssue}` : '');
+
+const thanksPart = thanks
+  ? `thanks-${thanks.toLowerCase().replace(/[^a-z0-9]/g, '-')}`
+  : '';
+
+const baseId = [versionPart, category, issuePart, thanksPart].filter(Boolean).join('--');
+
+// deterministic content hash for unique deep-link IDs across builds
+const slotContent = await Astro.slots.render('default');
+let hash = 0;
+for (let i = 0; i < slotContent.length; i++) {
+  hash = (hash << 5) - hash + slotContent.charCodeAt(i);
+  hash |= 0;
+}
+const contentSlug = Math.abs(hash).toString(36).substring(0, 4);
+const rowId = baseId ? `${baseId}--${contentSlug}` : contentSlug;
+---
+
+<div
+  id={rowId}
+  class="issue-row"
+  data-category={category}
+  style={`--cat-color: ${categoryColor}`}
+>
+  <a
+    href={`#${rowId}`}
+    class="issue-badge"
+    aria-label={`${label} - permalink to this release note`}
+  >
+    {label}
+  </a>
+
+  <div class="issue-content">
+    <div class="rni-body">
+      <slot />
+      {resolvedIn && viaIssue && (
+        <p class="rni-meta">
+          Resolved in version{' '}
+          <a href={`#version-${resolvedIn.replaceAll('.', '-')}`}><code>{resolvedIn}</code></a>
+          {' '}via{' '}
+          {issueBaseUrl
+            ? <a target="_blank" rel="noopener noreferrer" href={`${issueBaseUrl}${viaIssue}`}>#{viaIssue}</a>
+            : <span>#{viaIssue}</span>
+          }.
+        </p>
+      )}
+      {since && (
+        <p class="rni-meta">
+          Since: <a href={`#version-${since.replaceAll('.', '-')}`}><code>{since}</code></a>
+        </p>
+      )}
+      {thanks && (
+        <p class="rni-meta rni-thanks">
+          Thanks to{' '}
+          <a href={`https://github.com/${thanks}`}>@{thanks}</a>
+          {bonusThanks && (
+            <span> and <a href={`https://github.com/${bonusThanks}`}>@{bonusThanks}</a></span>
+          )}!
+        </p>
+      )}
+    </div>
+  </div>
+
+  {issue && (
+    issueBaseUrl
+      ? <a class="github-link" target="_blank" rel="noopener noreferrer" href={`${issueBaseUrl}${issue}`}>#{issue}</a>
+      : <span class="github-link">#{issue}</span>
+  )}
+  {bonusIssue && (
+    issueBaseUrl
+      ? <a class="github-link" target="_blank" rel="noopener noreferrer" href={`${issueBaseUrl}${bonusIssue}`}>#{bonusIssue}</a>
+      : <span class="github-link">#{bonusIssue}</span>
+  )}
+</div>

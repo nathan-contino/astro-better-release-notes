@@ -1,0 +1,109 @@
+---
+export interface SelectorEntry {
+  data: {
+    version: string;
+    date: Date;
+    name?: string;
+  };
+}
+
+export interface Props {
+  updates: SelectorEntry[];
+}
+
+const { updates } = Astro.props as Props;
+---
+
+<div class="release-selector">
+  <label for="release-notes-version" class="sr-only">Jump to a release version</label>
+  <select
+    id="release-notes-version"
+    class="release-selector-select"
+  >
+    <option value="">Jump to a version...</option>
+    {updates.map((item) => {
+      const versionId = `version-${item.data.version.replaceAll('.', '-')}`;
+      const label = `Version ${item.data.version}${item.data.name ? ` (${item.data.name})` : ''}`;
+      return <option value={versionId}>{label}</option>;
+    })}
+  </select>
+</div>
+
+<script is:inline>
+  const initVersionSpy = () => {
+    const selectEl = document.getElementById('release-notes-version');
+    if (!selectEl) return;
+
+    const placeholderOption = selectEl.querySelector('option[value=""]');
+    const versions = Array.from(document.querySelectorAll('article.version[id]'));
+    if (versions.length === 0) return;
+
+    const HEADER_OFFSET = 210;
+    let currentActiveId = null;
+    let isTicking = false;
+    let hasUserInteracted = false;
+
+    const disablePlaceholder = () => {
+      if (placeholderOption && !placeholderOption.disabled) {
+        placeholderOption.disabled = true;
+        placeholderOption.hidden = true;
+      }
+    };
+
+    const updateScrollSpy = () => {
+      if (window.scrollY === 0 && !hasUserInteracted) return;
+
+      let activeArticle = versions[0];
+      for (let i = versions.length - 1; i >= 0; i--) {
+        if (versions[i].getBoundingClientRect().top < HEADER_OFFSET) {
+          activeArticle = versions[i];
+          break;
+        }
+      }
+
+      if (activeArticle && activeArticle.id !== currentActiveId) {
+        currentActiveId = activeArticle.id;
+        selectEl.value = activeArticle.id;
+        disablePlaceholder();
+      }
+    };
+
+    const onScroll = () => {
+      if (window.scrollY > 0) hasUserInteracted = true;
+      if (!isTicking) {
+        window.requestAnimationFrame(() => {
+          updateScrollSpy();
+          isTicking = false;
+        });
+        isTicking = true;
+      }
+    };
+
+    // navigate on change; aria-live on the region announces the jump for screen readers
+    selectEl.addEventListener('change', () => {
+      hasUserInteracted = true;
+      disablePlaceholder();
+      if (selectEl.value) window.location.hash = selectEl.value;
+    });
+
+    const filterControls = document.querySelector('.filter-controls');
+    if (filterControls) {
+      filterControls.addEventListener('change', () => {
+        const targetVersion = versions.find(a => a.id === currentActiveId) || versions[0];
+        window.requestAnimationFrame(() => {
+          if (targetVersion && hasUserInteracted) {
+            const adjustment = targetVersion.getBoundingClientRect().top - HEADER_OFFSET;
+            window.scrollBy({ top: adjustment, behavior: 'instant' });
+          }
+          updateScrollSpy();
+        });
+      });
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    updateScrollSpy();
+  };
+
+  document.addEventListener('DOMContentLoaded', initVersionSpy);
+  document.addEventListener('astro:page-load', initVersionSpy);
+</script>
