@@ -9,14 +9,14 @@ export interface Category {
 }
 
 export const DEFAULT_CATEGORIES: Category[] = [
-  { id: 'new-feature',        label: 'New Feature',        color: '#16a34a' },
-  { id: 'enhancement',        label: 'Enhancement',        color: '#2563eb' },
-  { id: 'fix',                label: 'Fix',                color: '#d97706' },
-  { id: 'security',           label: 'Security',           color: '#566f98' },
-  { id: 'deprecated',         label: 'Deprecated',         color: '#ffcc48' },
-  { id: 'breaking-change',    label: 'Breaking Change',    color: '#aaaa33' },
-  { id: 'known-issue',        label: 'Known Issue',        color: '#bb4448' },
-  { id: 'internal',           label: 'Internal',           color: '#71717a' },
+  { id: 'new-feature',        label: 'New Feature',        color: 'var(--rn-color-new-feature, #16a34a)' },
+  { id: 'enhancement',        label: 'Enhancement',        color: 'var(--rn-color-enhancement, #2563eb)' },
+  { id: 'fix',                label: 'Fix',                color: 'var(--rn-color-fix, #d97706)' },
+  { id: 'security',           label: 'Security',           color: 'var(--rn-color-security, #566f98)' },
+  { id: 'deprecated',         label: 'Deprecated',         color: 'var(--rn-color-deprecated, #ffcc48)' },
+  { id: 'breaking-change',    label: 'Breaking Change',    color: 'var(--rn-color-breaking-change, #aaaa33)' },
+  { id: 'known-issue',        label: 'Known Issue',        color: 'var(--rn-color-known-issue, #bb4448)' },
+  { id: 'internal',           label: 'Internal',           color: 'var(--rn-color-internal, #71717a)' },
 ];
 
 export const getCategoryColor = (id: string, categories: Category[]) =>
@@ -90,7 +90,7 @@ const filterCSS = [
       ))}
     </nav>
 
-    <noscript><style>@media (max-width: 767px) { #release-notes-filters { display: flex !important; flex-wrap: wrap; } .filter-toggle-btn { display: none !important; } }</style></noscript>
+    <noscript><style>@media (max-width: 1023px) { #release-notes-filters { display: flex !important; flex-wrap: wrap; } .filter-toggle-btn { display: none !important; } }</style></noscript>
   </div>
 
   <div class="version-list">

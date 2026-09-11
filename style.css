@@ -7,7 +7,20 @@
   Dark mode: uses a .dark ancestor class (e.g. Tailwind's darkMode: 'class').
   See README for enabling OS-based dark mode without a class toggle.
 
-  Category colors are driven by --cat-color, set inline by ReleaseNotesItem.
+  Category colors: set --rn-color-{id} on :root / .dark to override per-category
+  badge and chip colors without touching component code. E.g.:
+    :root { --rn-color-enhancement: #7c3aed; }
+    .dark  { --rn-color-enhancement: #fb923c; }
+
+  Built-in category defaults (CSS fallback, also used by DEFAULT_CATEGORIES):
+    --rn-color-new-feature:     #16a34a
+    --rn-color-enhancement:     #2563eb
+    --rn-color-fix:             #d97706
+    --rn-color-security:        #566f98
+    --rn-color-deprecated:      #ffcc48
+    --rn-color-breaking-change: #aaaa33
+    --rn-color-known-issue:     #bb4448
+    --rn-color-internal:        #71717a
 
   Sticky offset configuration:
     Set --release-notes-top on :root (or any ancestor of .release-sticky-header)
@@ -31,13 +44,13 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0;
-  background-color: white;
+  background-color: var(--rn-bg, white);
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
   margin-bottom: 0.5rem;
 }
 
 .dark .release-sticky-header {
-  background-color: #0f172a;
+  background-color: var(--rn-bg, #0f172a);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
@@ -55,21 +68,21 @@
   height: 2.5rem;
   padding: 0 0.5rem;
   border-radius: 6px;
-  border: 2px solid #d1d5db;
-  background-color: #f3f4f6;
-  color: #111827;
+  border: 2px solid var(--rn-border, #d1d5db);
+  background-color: var(--rn-input-bg, #f3f4f6);
+  color: var(--rn-text, #111827);
   cursor: pointer;
 }
 
 .release-selector-select:focus {
-  outline: 2px solid #6366f1;
+  outline: 2px solid var(--rn-focus, #6366f1);
   outline-offset: 1px;
 }
 
 .dark .release-selector-select {
-  border-color: #4b5563;
-  background-color: #1e293b;
-  color: #cbd5e1;
+  border-color: var(--rn-border, #4b5563);
+  background-color: var(--rn-input-bg, #1e293b);
+  color: var(--rn-text, #cbd5e1);
 }
 
 /* ---------------------------------------------------------------
@@ -86,38 +99,38 @@
   font-size: 0.875rem;
   font-weight: 500;
   border-radius: 6px;
-  border: 2px solid #d1d5db;
-  background-color: #f3f4f6;
-  color: #374151;
+  border: 2px solid var(--rn-border, #d1d5db);
+  background-color: var(--rn-input-bg, #f3f4f6);
+  color: var(--rn-text-muted, #374151);
   cursor: pointer;
   white-space: nowrap;
 }
 
 .filter-toggle-btn:focus {
-  outline: 2px solid #6366f1;
+  outline: 2px solid var(--rn-focus, #6366f1);
   outline-offset: 1px;
 }
 
 .dark .filter-toggle-btn {
-  border-color: #4b5563;
-  background-color: #1e293b;
-  color: #cbd5e1;
+  border-color: var(--rn-border, #4b5563);
+  background-color: var(--rn-input-bg, #1e293b);
+  color: var(--rn-text, #cbd5e1);
 }
 
 /* indicate active filters */
 .release-container:has(.filter-input:checked) .filter-toggle-btn {
-  border-color: #6366f1;
-  background-color: color-mix(in srgb, #6366f1 12%, transparent);
-  color: #6366f1;
+  border-color: var(--rn-focus, #6366f1);
+  background-color: color-mix(in srgb, var(--rn-focus, #6366f1) 12%, transparent);
+  color: var(--rn-focus, #6366f1);
 }
 
 .dark .release-container:has(.filter-input:checked) .filter-toggle-btn {
-  border-color: #818cf8;
-  color: #818cf8;
-  background-color: color-mix(in srgb, #818cf8 15%, transparent);
+  border-color: var(--rn-focus, #818cf8);
+  color: var(--rn-focus, #818cf8);
+  background-color: color-mix(in srgb, var(--rn-focus, #818cf8) 15%, transparent);
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
   .filter-toggle-btn {
     display: none;
   }
@@ -128,7 +141,7 @@
 --------------------------------------------------------------- */
 
 /* hidden on mobile by default; shown via .is-open (JS) or desktop breakpoint */
-@media (max-width: 767px) {
+@media (max-width: 1023px) {
   .filter-controls {
     display: none;
   }
@@ -138,7 +151,7 @@
   }
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
   .filter-controls {
     display: flex;
   }
@@ -164,15 +177,15 @@
   transition: filter 0.15s ease-in-out;
   opacity: 0.7;
   filter: grayscale(100%);
-  color: #334155;
-  background-color: #f1f5f9;
-  border: 1px solid #cbd5e1;
+  color: var(--rn-chip-color, #334155);
+  background-color: var(--rn-chip-bg, #f1f5f9);
+  border: 1px solid var(--rn-chip-border, #cbd5e1);
 }
 
 .dark .filter-chip {
-  color: #cbd5e1;
-  background-color: #1e293b;
-  border-color: #475569;
+  color: var(--rn-chip-color, #cbd5e1);
+  background-color: var(--rn-chip-bg, #1e293b);
+  border-color: var(--rn-chip-border, #475569);
 }
 
 .filter-chip:hover {
@@ -190,6 +203,20 @@
   border-color: var(--cat-color) !important;
   color: #fff !important;
 }
+
+/* ---------------------------------------------------------------
+   Release note rows: per-category --cat-color defaults
+   These are overridden when the caller sets --cat-color inline.
+--------------------------------------------------------------- */
+
+.issue-row[data-category="new-feature"]     { --cat-color: var(--rn-color-new-feature,     #16a34a); }
+.issue-row[data-category="enhancement"]     { --cat-color: var(--rn-color-enhancement,     #2563eb); }
+.issue-row[data-category="fix"]             { --cat-color: var(--rn-color-fix,             #d97706); }
+.issue-row[data-category="security"]        { --cat-color: var(--rn-color-security,        #566f98); }
+.issue-row[data-category="deprecated"]      { --cat-color: var(--rn-color-deprecated,      #ffcc48); }
+.issue-row[data-category="breaking-change"] { --cat-color: var(--rn-color-breaking-change, #aaaa33); }
+.issue-row[data-category="known-issue"]     { --cat-color: var(--rn-color-known-issue,     #bb4448); }
+.issue-row[data-category="internal"]        { --cat-color: var(--rn-color-internal,        #71717a); }
 
 /* ---------------------------------------------------------------
    Release note rows

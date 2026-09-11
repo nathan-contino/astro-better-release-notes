@@ -11,7 +11,7 @@ export interface Props {
   // base URL for issue links, e.g. "https://github.com/org/repo/issues/"
   // if omitted, issue numbers are shown as plain text
   issueBaseUrl?: string;
-  // color for this item's badge; if omitted, uses a neutral gray
+  // color for this item's badge; if omitted, CSS handles it via --rn-color-{category}
   categoryColor?: string;
   // human-readable category label; if omitted, generated from id
   categoryLabel?: string;
@@ -27,7 +27,7 @@ const {
   resolvedIn,
   viaIssue,
   issueBaseUrl = '',
-  categoryColor = '#71717a',
+  categoryColor,
   categoryLabel,
 } = Astro.props as Props;
 
@@ -63,7 +63,7 @@ const rowId = baseId ? `${baseId}--${contentSlug}` : contentSlug;
   id={rowId}
   class="issue-row"
   data-category={category}
-  style={`--cat-color: ${categoryColor}`}
+  style={categoryColor ? `--cat-color: ${categoryColor}` : undefined}
 >
   <a
     href={`#${rowId}`}
