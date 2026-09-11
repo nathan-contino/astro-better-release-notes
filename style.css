@@ -4,20 +4,151 @@
   Import this in your project root layout to enable release notes styles.
   No external dependencies -- no Tailwind, no framework.
 
-  Dark mode: supports both @media (prefers-color-scheme: dark) and a .dark
-  ancestor class (e.g. Tailwind's darkMode: 'class').
+  Dark mode: uses a .dark ancestor class (e.g. Tailwind's darkMode: 'class').
+  See README for enabling OS-based dark mode without a class toggle.
 
   Category colors are driven by --cat-color, set inline by ReleaseNotesItem.
+
+  Sticky offset configuration:
+    Set --release-notes-top on :root (or any ancestor of .release-sticky-header)
+    to match your site's fixed navigation height. Defaults to 3.5rem (56px).
+
+    Example:
+      :root { --release-notes-top: 57px; }
+      @media (min-width: 1024px) { :root { --release-notes-top: 80px; } }
 */
+
+/* ---------------------------------------------------------------
+   Sticky header (selector + filter toggle + chips)
+--------------------------------------------------------------- */
+
+.release-sticky-header {
+  position: sticky;
+  top: var(--release-notes-top, 3.5rem);
+  z-index: 11;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  background-color: white;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+  margin-bottom: 0.5rem;
+}
+
+.dark .release-sticky-header {
+  background-color: #0f172a;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* ---------------------------------------------------------------
+   Version selector (jump dropdown)
+--------------------------------------------------------------- */
+
+.release-selector {
+  flex: 1;
+  min-width: 200px;
+}
+
+.release-selector-select {
+  width: 100%;
+  height: 2.5rem;
+  padding: 0 0.5rem;
+  border-radius: 6px;
+  border: 2px solid #d1d5db;
+  background-color: #f3f4f6;
+  color: #111827;
+  cursor: pointer;
+}
+
+.release-selector-select:focus {
+  outline: 2px solid #6366f1;
+  outline-offset: 1px;
+}
+
+.dark .release-selector-select {
+  border-color: #4b5563;
+  background-color: #1e293b;
+  color: #cbd5e1;
+}
+
+/* ---------------------------------------------------------------
+   Filter toggle button (mobile only)
+--------------------------------------------------------------- */
+
+.filter-toggle-btn {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.4375rem 0.75rem;
+  height: 2.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 6px;
+  border: 2px solid #d1d5db;
+  background-color: #f3f4f6;
+  color: #374151;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.filter-toggle-btn:focus {
+  outline: 2px solid #6366f1;
+  outline-offset: 1px;
+}
+
+.dark .filter-toggle-btn {
+  border-color: #4b5563;
+  background-color: #1e293b;
+  color: #cbd5e1;
+}
+
+/* indicate active filters */
+.release-container:has(.filter-input:checked) .filter-toggle-btn {
+  border-color: #6366f1;
+  background-color: color-mix(in srgb, #6366f1 12%, transparent);
+  color: #6366f1;
+}
+
+.dark .release-container:has(.filter-input:checked) .filter-toggle-btn {
+  border-color: #818cf8;
+  color: #818cf8;
+  background-color: color-mix(in srgb, #818cf8 15%, transparent);
+}
+
+@media (min-width: 768px) {
+  .filter-toggle-btn {
+    display: none;
+  }
+}
 
 /* ---------------------------------------------------------------
    Filter controls (category chips)
 --------------------------------------------------------------- */
 
+/* hidden on mobile by default; shown via .is-open (JS) or desktop breakpoint */
+@media (max-width: 767px) {
+  .filter-controls {
+    display: none;
+  }
+
+  .filter-controls.is-open {
+    display: flex;
+  }
+}
+
+@media (min-width: 768px) {
+  .filter-controls {
+    display: flex;
+  }
+}
+
 .filter-controls {
-  display: flex;
+  flex: 0 0 100%;
   flex-wrap: wrap;
   gap: 0.75rem;
+  padding: 0.25rem 0;
 }
 
 .filter-input {
@@ -38,14 +169,6 @@
   border: 1px solid #cbd5e1;
 }
 
-@media (prefers-color-scheme: dark) {
-  .filter-chip {
-    color: #cbd5e1;
-    background-color: #1e293b;
-    border-color: #475569;
-  }
-}
-
 .dark .filter-chip {
   color: #cbd5e1;
   background-color: #1e293b;
@@ -54,12 +177,6 @@
 
 .filter-chip:hover {
   filter: grayscale(100%) brightness(0.95);
-}
-
-@media (prefers-color-scheme: dark) {
-  .filter-chip:hover {
-    filter: grayscale(100%) brightness(1.1);
-  }
 }
 
 .dark .filter-chip:hover {
@@ -145,10 +262,6 @@
   color: #475569;
 }
 
-@media (prefers-color-scheme: dark) {
-  .rni-thanks { color: #94a3b8; }
-}
-
 .dark .rni-thanks { color: #94a3b8; }
 
 .github-link {
@@ -181,10 +294,6 @@
   border-bottom: 1px solid #e2e8f0;
 }
 
-@media (prefers-color-scheme: dark) {
-  .version-header { border-bottom-color: #1e293b; }
-}
-
 .dark .version-header { border-bottom-color: #1e293b; }
 
 .version-date {
@@ -193,42 +302,19 @@
 }
 
 /* ---------------------------------------------------------------
-   Version selector (jump dropdown)
+   Version anchor links (# permalink)
 --------------------------------------------------------------- */
 
-.release-selector {
-  position: sticky;
-  top: 2.75rem;
-  z-index: 10;
-  padding: 0.75rem 0;
+.release-note .anchor-link {
+  opacity: 0;
+  text-decoration: none;
+  border: none;
+  margin-left: 0.5rem;
+  color: inherit;
+  transition: opacity 0.15s ease;
 }
 
-.release-selector-select {
-  width: 100%;
-  height: 2.5rem;
-  padding: 0 0.5rem;
-  border-radius: 6px;
-  border: 2px solid #d1d5db;
-  background-color: #f3f4f6;
-  color: #111827;
-  cursor: pointer;
-}
-
-.release-selector-select:focus {
-  outline: 2px solid #6366f1;
-  outline-offset: 1px;
-}
-
-@media (prefers-color-scheme: dark) {
-  .release-selector-select {
-    border-color: #4b5563;
-    background-color: #1e293b;
-    color: #cbd5e1;
-  }
-}
-
-.dark .release-selector-select {
-  border-color: #4b5563;
-  background-color: #1e293b;
-  color: #cbd5e1;
+.release-note:hover .anchor-link,
+.release-note .anchor-link:focus-visible {
+  opacity: 1;
 }

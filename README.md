@@ -18,9 +18,9 @@ import 'astro-better-release-notes/style.css';
 
 ## Components
 
-- `ReleaseNotes` - renders the filter chips and the full version list
+- `ReleaseNotes` - renders a unified sticky header (version selector + category filter chips) and the full version list
 - `ReleaseNotesItem` - a single categorized release note row (used inside MDX content)
-- `ReleaseNotesSelector` - a sticky version jump dropdown
+- `ReleaseNotesSelector` - a standalone version jump dropdown (for custom layouts that need it separately)
 
 ## Usage
 
@@ -54,14 +54,12 @@ import { ReleaseNotesItem } from 'astro-better-release-notes';
 
 ### Page component
 
+`ReleaseNotes` renders everything in one call: a sticky header containing the version selector and filter chips, then the full version list below.
+
 ```astro
 ---
 import { getCollection, render } from 'astro:content';
-import {
-  ReleaseNotes,
-  ReleaseNotesSelector,
-  DEFAULT_CATEGORIES,
-} from 'astro-better-release-notes';
+import { ReleaseNotes, DEFAULT_CATEGORIES } from 'astro-better-release-notes';
 
 const allUpdates = await getCollection('releases');
 const updates = allUpdates
@@ -78,9 +76,42 @@ const rendered = await Promise.all(
 );
 ---
 
-<ReleaseNotesSelector updates={rendered} />
 <ReleaseNotes updates={rendered} categories={DEFAULT_CATEGORIES} />
 ```
+
+### ReleaseNotes props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `updates` | `ReleaseEntry[]` | required | Pre-rendered version entries |
+| `categories` | `Category[]` | `DEFAULT_CATEGORIES` | Category definitions |
+| `components` | `Record<string, any>` | `{}` | Component overrides (e.g. custom `ReleaseNotesItem`) |
+| `showSelector` | `boolean` | `true` | Set `false` to hide the version jump dropdown |
+
+### Sticky offset
+
+The sticky header sticks below your site navigation. Set the `--release-notes-top` CSS custom property to match your nav height:
+
+```css
+/* in your root layout or global CSS */
+:root {
+  --release-notes-top: 56px; /* your mobile nav height */
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --release-notes-top: 80px; /* your desktop nav height */
+  }
+}
+```
+
+The default is `3.5rem` (56px). Set the variable on `:root`, `html`, or any ancestor of `.release-sticky-header`.
+
+### Mobile filter behavior
+
+On narrow screens the category filter chips are hidden behind a "Filter" toggle button that sits next to the version selector. Tapping it expands the chips below the selector row. When any filter is active, the button changes color as a visual indicator.
+
+On screens 768px and wider, the chips are always visible.
 
 ## Custom categories
 
@@ -131,8 +162,6 @@ Note: for the `components` injection to work with categories, you also need to p
 import { getCategoryColor, getCategoryLabel, DEFAULT_CATEGORIES } from 'astro-better-release-notes';
 ```
 
-Or provide these values in your own wrapper by computing them from your category list.
-
 ## ReleaseNotesItem props
 
 | Prop | Type | Description |
@@ -153,6 +182,28 @@ Or provide these values in your own wrapper by computing them from your category
 
 `ReleaseNotes.astro` does not automatically inject `categoryColor`/`categoryLabel` into the MDX-rendered items -- those props come from the MDX markup. To automate this, create a wrapper that looks up the category in your list and injects the values, then pass it via `components`.
 
+## Standalone ReleaseNotesSelector
+
+`ReleaseNotesSelector` is available as a standalone component for custom layouts that need the version dropdown without the rest of the notes. It is not sticky by default; wrap it in your own sticky container if needed.
+
+```astro
+import { ReleaseNotesSelector } from 'astro-better-release-notes';
+---
+<div style="position: sticky; top: 56px;">
+  <ReleaseNotesSelector {updates} />
+</div>
+```
+
 ## Dark mode
 
-The stylesheet supports both `@media (prefers-color-scheme: dark)` and a `.dark` ancestor class.
+The stylesheet uses a `.dark` ancestor class (compatible with Tailwind's `darkMode: 'class'`). To also enable automatic OS-based dark mode, add to your project CSS:
+
+```css
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) {
+    /* copy the .dark rules you need, or add the .dark class via JS */
+  }
+}
+```
+
+Most Tailwind setups initialize the `.dark` class from OS preference on first load, so no extra CSS is needed.

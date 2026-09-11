@@ -1,5 +1,6 @@
 ---
 import ReleaseNotesItem from './ReleaseNotesItem.astro';
+import ReleaseNotesSelector from './ReleaseNotesSelector.astro';
 
 export interface Category {
   id: string;
@@ -41,12 +42,15 @@ export interface Props {
   categories?: Category[];
   // pass { ReleaseNotesItem: YourWrapper } to inject a custom item component
   components?: Record<string, any>;
+  // set false to hide the version jump dropdown
+  showSelector?: boolean;
 }
 
 const {
   updates,
   categories = DEFAULT_CATEGORIES,
   components: extraComponents = {},
+  showSelector = true,
 } = Astro.props as Props;
 
 const mergedComponents = { ReleaseNotesItem, ...extraComponents };
@@ -63,14 +67,31 @@ const filterCSS = [
 <Fragment set:html={`<style>${filterCSS}</style>`} />
 
 <div class="release-container">
-  <nav class="filter-controls" aria-label="Filter release notes by category">
-    {categories.map(cat => (
-      <label class="filter-chip" style={`--cat-color: ${cat.color}`}>
-        <input type="checkbox" id={`toggle-${cat.id}`} class="filter-input" aria-label={`Show ${cat.label}`} />
-        <span aria-hidden="true">{cat.label}</span>
-      </label>
-    ))}
-  </nav>
+  <div class="release-sticky-header">
+    {showSelector && <ReleaseNotesSelector {updates} />}
+
+    <button
+      class="filter-toggle-btn"
+      aria-expanded="false"
+      aria-controls="release-notes-filters"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor">
+        <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/>
+      </svg>
+      Filter
+    </button>
+
+    <nav id="release-notes-filters" class="filter-controls" aria-label="Filter release notes by category">
+      {categories.map(cat => (
+        <label class="filter-chip" style={`--cat-color: ${cat.color}`}>
+          <input type="checkbox" id={`toggle-${cat.id}`} class="filter-input" aria-label={`Show ${cat.label}`} />
+          <span aria-hidden="true">{cat.label}</span>
+        </label>
+      ))}
+    </nav>
+
+    <noscript><style>@media (max-width: 767px) { #release-notes-filters { display: flex !important; flex-wrap: wrap; } .filter-toggle-btn { display: none !important; } }</style></noscript>
+  </div>
 
   <div class="version-list">
     {updates.map((item) => {
@@ -96,3 +117,18 @@ const filterCSS = [
     })}
   </div>
 </div>
+
+<script is:inline>
+  const initFilterToggle = () => {
+    const btn = document.querySelector('.filter-toggle-btn');
+    const nav = document.getElementById('release-notes-filters');
+    if (!btn || !nav) return;
+    btn.addEventListener('click', () => {
+      const expanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', String(!expanded));
+      nav.classList.toggle('is-open', !expanded);
+    });
+  };
+  document.addEventListener('DOMContentLoaded', initFilterToggle);
+  document.addEventListener('astro:page-load', initFilterToggle);
+</script>
