@@ -23,7 +23,8 @@ const { updates } = Astro.props as Props;
     <option value="">Jump to a version...</option>
     {updates.map((item) => {
       const versionId = `version-${item.data.version.replaceAll('.', '-')}`;
-      const label = `Version ${item.data.version}${item.data.name ? ` (${item.data.name})` : ''}`;
+      // bare version so typing in the select jumps straight to it; the label supplies the context
+      const label = `${item.data.version}${item.data.name ? ` (${item.data.name})` : ''}`;
       return <option value={versionId}>{label}</option>;
     })}
   </select>
@@ -65,8 +66,13 @@ const { updates } = Astro.props as Props;
         }
       }
 
-      if (activeArticle && headingId(activeArticle) !== currentActiveId) {
-        currentActiveId = headingId(activeArticle);
+      if (activeArticle) currentActiveId = headingId(activeArticle);
+      // writing value mid-interaction resets native type-ahead, so wait for blur
+      if (document.activeElement !== selectEl) syncSelect();
+    };
+
+    const syncSelect = () => {
+      if (currentActiveId && selectEl.value !== currentActiveId) {
         selectEl.value = currentActiveId;
         disablePlaceholder();
       }
@@ -83,13 +89,19 @@ const { updates } = Astro.props as Props;
       }
     };
 
-    // focus stays on the select (arrow keys fire change on windows), so announce the jump instead
+    // hide the placeholder before typing starts; changing options mid-type-ahead resets it
+    selectEl.addEventListener('focus', disablePlaceholder, { once: true });
+    selectEl.addEventListener('blur', syncSelect);
+
+    // location.hash blurs the select (breaks type-ahead/arrows); replaceState also skips per-key history entries
     selectEl.addEventListener('change', () => {
       hasUserInteracted = true;
       disablePlaceholder();
-      if (!selectEl.value) return;
-      window.location.hash = selectEl.value;
-      if (statusEl) statusEl.textContent = `Jumped to ${selectEl.selectedOptions[0]?.textContent ?? selectEl.value}`;
+      const target = selectEl.value && document.getElementById(selectEl.value);
+      if (!target) return;
+      history.replaceState(history.state, '', `#${selectEl.value}`);
+      target.scrollIntoView({ block: 'start' });
+      if (statusEl) statusEl.textContent = `Jumped to version ${selectEl.selectedOptions[0]?.textContent ?? selectEl.value}`;
     });
 
     const filterControls = document.querySelector('.filter-controls');

@@ -115,14 +115,17 @@ Set both variables on `html` or any ancestor of `.release-container`.
 
 ### Link colors
 
-The github issue links and category badge hover colors are configurable:
+The issue links, version permalinks (`#`), and category badge hover colors are configurable:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `--release-notes-link-color` | `#4338ca` (indigo-700) | Issue link color |
-| `--release-notes-link-hover-color` | `#9a3412` (orange-800) | Hover color for links and badge |
-| `--release-notes-link-color-dark` | `#818cf8` (indigo-400) | Dark mode link color |
+| `--release-notes-link-color` | `#4338ca` (indigo-700) | Issue link and permalink color |
+| `--release-notes-link-hover-color` | `#9a3412` (orange-800) | Hover color for links, permalinks, and badges |
+| `--release-notes-link-color-dark` | `#818cf8` (indigo-400) | Dark mode link and permalink color |
 | `--release-notes-link-hover-color-dark` | `#fed7aa` (orange-200) | Dark mode hover color |
+| `--release-notes-anchor-size` | `1.5em` | Font size of the version permalink; match it to your `h2` size |
+
+The permalink sits beside the version heading rather than inside it, so it doesn't inherit the heading's size. Set `--release-notes-anchor-size` if your `h2` isn't `1.5em`.
 
 ### Theme variables
 
@@ -235,9 +238,15 @@ import { ReleaseNotesSelector } from 'astro-better-release-notes';
 - Each version is an `<article>` labelled by its `<h2>`. The `<h2>` carries the anchor id (`version-1-2-3`), so fragment links, search crawlers, and TOC tools all resolve to the heading. The `#` permalink sits next to the heading rather than inside it, so the heading's accessible name is only the version.
 - Category filters are native checkboxes inside a `<fieldset>` with a visually hidden `<legend>`. They work with Tab and Space, show a focus ring on the chip, and announce their checked state. Selected chips show a check mark as well as color.
 - Badge and selected-chip text colors are mixed from the category color (darker in light mode, lighter in dark mode), so they stay at or above 4.5:1 for the default categories and for most custom mid-tone colors.
-- The version selector has a label and announces each jump through a polite live region. Focus stays on the selector, because Chrome and Edge on Windows fire `change` on every arrow key press.
+- The version selector has a label, and its options are bare version numbers, so typing `1.56` jumps to 1.56.0. Each jump is announced through a polite live region. Focus stays on the selector so type-ahead and arrow keys keep working: the selector scrolls with `scrollIntoView` and updates the URL with `history.replaceState`, because assigning `location.hash` would blur it. Jumps don't add browser history entries.
 - Transitions and the badge hover scale are disabled under `prefers-reduced-motion: reduce`.
 - The package ships its own `.rn-sr-only` class, so it doesn't depend on a host `sr-only` utility.
+
+## Upgrading to 0.2.3
+
+- Version selector options no longer start with "Version" (`1.56.0 (SSO Snake)` instead of `Version 1.56.0 (SSO Snake)`).
+- Choosing a version updates the URL with `history.replaceState` instead of a new history entry, so the Back button leaves the page rather than stepping back through jumps.
+- The version permalink now uses the link color variables and `--release-notes-anchor-size` instead of inheriting the surrounding text color and size.
 
 ## Upgrading to 0.2.2
 

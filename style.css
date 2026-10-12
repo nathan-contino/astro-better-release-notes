@@ -387,18 +387,33 @@
    Version anchor links (# permalink)
 --------------------------------------------------------------- */
 
+/* sits beside the h2, not inside it, so size it to match the heading */
 .version-title .anchor-link {
   opacity: 0;
+  font-size: var(--release-notes-anchor-size, 1.5em);
+  font-weight: 500;
   text-decoration: none;
   border: none;
   margin-left: 0.5rem;
-  color: inherit;
-  transition: opacity 0.15s ease;
+  color: var(--release-notes-link-color, #4338ca);
+  transition: opacity 0.15s ease, color 0.15s ease;
 }
 
 .version-title:hover .anchor-link,
 .version-title .anchor-link:focus-visible {
   opacity: 1;
+}
+
+.version-title .anchor-link:hover {
+  color: var(--release-notes-link-hover-color, #9a3412);
+}
+
+.dark .version-title .anchor-link {
+  color: var(--release-notes-link-color-dark, #818cf8);
+}
+
+.dark .version-title .anchor-link:hover {
+  color: var(--release-notes-link-hover-color-dark, #fed7aa);
 }
 
 /* ---------------------------------------------------------------
