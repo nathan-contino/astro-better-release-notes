@@ -15,7 +15,7 @@ const { updates } = Astro.props as Props;
 ---
 
 <div class="release-selector">
-  <label for="release-notes-version" class="sr-only">Jump to a release version</label>
+  <label for="release-notes-version" class="rn-sr-only">Jump to a release version</label>
   <select
     id="release-notes-version"
     class="release-selector-select"
@@ -27,15 +27,19 @@ const { updates } = Astro.props as Props;
       return <option value={versionId}>{label}</option>;
     })}
   </select>
+  <p id="release-notes-version-status" class="rn-sr-only" aria-live="polite"></p>
 </div>
 
 <script is:inline>
   const initVersionSpy = () => {
+    // each article's anchor id lives on its h2
+    const headingId = (article) => article.querySelector('h2[id]')?.id;
     const selectEl = document.getElementById('release-notes-version');
     if (!selectEl) return;
 
     const placeholderOption = selectEl.querySelector('option[value=""]');
-    const versions = Array.from(document.querySelectorAll('article.version[id]'));
+    const statusEl = document.getElementById('release-notes-version-status');
+    const versions = Array.from(document.querySelectorAll('article.version')).filter(a => headingId(a));
     if (versions.length === 0) return;
 
     const HEADER_OFFSET = 210;
@@ -61,9 +65,9 @@ const { updates } = Astro.props as Props;
         }
       }
 
-      if (activeArticle && activeArticle.id !== currentActiveId) {
-        currentActiveId = activeArticle.id;
-        selectEl.value = activeArticle.id;
+      if (activeArticle && headingId(activeArticle) !== currentActiveId) {
+        currentActiveId = headingId(activeArticle);
+        selectEl.value = currentActiveId;
         disablePlaceholder();
       }
     };
@@ -79,17 +83,19 @@ const { updates } = Astro.props as Props;
       }
     };
 
-    // navigate on change; aria-live on the region announces the jump for screen readers
+    // focus stays on the select (arrow keys fire change on windows), so announce the jump instead
     selectEl.addEventListener('change', () => {
       hasUserInteracted = true;
       disablePlaceholder();
-      if (selectEl.value) window.location.hash = selectEl.value;
+      if (!selectEl.value) return;
+      window.location.hash = selectEl.value;
+      if (statusEl) statusEl.textContent = `Jumped to ${selectEl.selectedOptions[0]?.textContent ?? selectEl.value}`;
     });
 
     const filterControls = document.querySelector('.filter-controls');
     if (filterControls) {
       filterControls.addEventListener('change', () => {
-        const targetVersion = versions.find(a => a.id === currentActiveId) || versions[0];
+        const targetVersion = versions.find(a => headingId(a) === currentActiveId) || versions[0];
         window.requestAnimationFrame(() => {
           if (targetVersion && hasUserInteracted) {
             const adjustment = targetVersion.getBoundingClientRect().top - HEADER_OFFSET;

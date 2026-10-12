@@ -162,21 +162,38 @@
   flex-wrap: wrap;
   gap: 0.75rem;
   padding: 0.25rem 0;
+  /* fieldset resets */
+  border: 0;
+  margin: 0;
+  min-inline-size: 0;
 }
 
+/* visually hidden but still focusable and announced; the chip shows its state */
 .filter-input {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.filter-chip:has(.filter-input:focus-visible) {
+  outline: 2px solid var(--rn-focus, #6366f1);
+  outline-offset: 2px;
 }
 
 .filter-chip {
+  position: relative;
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
   font-weight: 500;
   border-radius: 9999px;
   cursor: pointer;
   transition: filter 0.15s ease-in-out;
-  opacity: 0.7;
-  filter: grayscale(100%);
   color: var(--rn-chip-color, #334155);
   background-color: var(--rn-chip-bg, #f1f5f9);
   border: 1px solid var(--rn-chip-border, #cbd5e1);
@@ -189,19 +206,28 @@
 }
 
 .filter-chip:hover {
-  filter: grayscale(100%) brightness(0.95);
+  filter: brightness(0.95);
 }
 
 .dark .filter-chip:hover {
-  filter: grayscale(100%) brightness(1.1);
+  filter: brightness(1.1);
 }
 
+/* selected: tint + border + check so state isn't color-only; text mixes keep 4.5:1 */
 .filter-chip:has(input:checked) {
-  filter: grayscale(0);
-  opacity: 1;
-  background-color: var(--cat-color) !important;
+  background-color: color-mix(in srgb, var(--cat-color) 18%, white) !important;
   border-color: var(--cat-color) !important;
-  color: #fff !important;
+  color: color-mix(in srgb, var(--cat-color) 45%, black) !important;
+}
+
+.dark .filter-chip:has(input:checked) {
+  background-color: color-mix(in srgb, var(--cat-color) 18%, #1e293b) !important;
+  color: color-mix(in srgb, var(--cat-color) 60%, white) !important;
+}
+
+.filter-chip:has(input:checked)::before {
+  content: "\2713" / "";
+  margin-right: 0.375rem;
 }
 
 /* ---------------------------------------------------------------
@@ -261,8 +287,12 @@
   transition: transform 0.15s ease-out, color 0.15s ease-out;
   transform-origin: left center;
   background-color: color-mix(in srgb, var(--cat-color) 13%, transparent);
-  color: var(--cat-color);
+  color: color-mix(in srgb, var(--cat-color) 45%, black);
   border: 1px solid color-mix(in srgb, var(--cat-color) 27%, transparent);
+}
+
+.dark .issue-badge {
+  color: color-mix(in srgb, var(--cat-color) 60%, white);
 }
 
 .issue-badge:hover {
@@ -323,7 +353,13 @@
    Version articles
 --------------------------------------------------------------- */
 
-.version {
+.version-title {
+  display: flex;
+  align-items: baseline;
+}
+
+/* the heading carries the anchor id */
+.release-note[id] {
   scroll-margin-top: var(--release-notes-scroll-margin, 5rem);
 }
 
@@ -345,11 +381,13 @@
   color: #64748b;
 }
 
+.dark .version-date { color: #94a3b8; }
+
 /* ---------------------------------------------------------------
    Version anchor links (# permalink)
 --------------------------------------------------------------- */
 
-.release-note .anchor-link {
+.version-title .anchor-link {
   opacity: 0;
   text-decoration: none;
   border: none;
@@ -358,7 +396,37 @@
   transition: opacity 0.15s ease;
 }
 
-.release-note:hover .anchor-link,
-.release-note .anchor-link:focus-visible {
+.version-title:hover .anchor-link,
+.version-title .anchor-link:focus-visible {
   opacity: 1;
+}
+
+/* ---------------------------------------------------------------
+   Utilities and motion
+--------------------------------------------------------------- */
+
+.rn-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .filter-chip,
+  .issue-badge,
+  .github-link,
+  .version-title .anchor-link {
+    transition: none;
+  }
+
+  .issue-badge:hover,
+  .issue-badge:active {
+    transform: none;
+  }
 }

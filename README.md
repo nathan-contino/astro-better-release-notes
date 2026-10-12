@@ -92,9 +92,9 @@ const rendered = await Promise.all(
 
 Two CSS custom properties control the positioning:
 
-`--release-notes-top` — how far the sticky header sits from the viewport top (should match your site's fixed nav height). Default: `3.5rem`.
+`--release-notes-top` -- how far the sticky header sits from the viewport top (should match your site's fixed nav height). Default: `3.5rem`.
 
-`--release-notes-scroll-margin` — the `scroll-margin-top` applied to both version articles and individual release note rows when navigating via anchor links. Should be at least as large as your total sticky height (nav + release-notes sticky header). Default: `5rem`.
+`--release-notes-scroll-margin` -- the `scroll-margin-top` applied to version headings and individual release note rows, which are the targets of anchor links and the version selector. Set it to at least the distance from the viewport top to the bottom edge of the release notes sticky header (your nav plus the selector and chip rows), or anchored headings land underneath the header. The chip rows wrap with viewport width, so measure at your breakpoints. Default: `5rem`.
 
 ```css
 /* in your root layout or global CSS */
@@ -124,11 +124,30 @@ The github issue links and category badge hover colors are configurable:
 | `--release-notes-link-color-dark` | `#818cf8` (indigo-400) | Dark mode link color |
 | `--release-notes-link-hover-color-dark` | `#fed7aa` (orange-200) | Dark mode hover color |
 
+### Theme variables
+
+Set these on `:root` (and `.dark` for dark mode) to match your site. Each falls back to the default shown.
+
+| Variable | Light default | Dark default | Used for |
+|----------|---------------|--------------|----------|
+| `--rn-bg` | `white` | `#0f172a` | Sticky header background |
+| `--rn-border` | `#d1d5db` | `#4b5563` | Selector and filter button borders |
+| `--rn-input-bg` | `#f3f4f6` | `#1e293b` | Selector and filter button background |
+| `--rn-text` | `#111827` | `#cbd5e1` | Selector text |
+| `--rn-text-muted` | `#374151` | `#cbd5e1` | Filter button text |
+| `--rn-focus` | `#6366f1` | `#818cf8` | Focus rings and the active-filter indicator |
+| `--rn-chip-bg` | `#f1f5f9` | `#1e293b` | Unselected chip background |
+| `--rn-chip-border` | `#cbd5e1` | `#475569` | Unselected chip border |
+| `--rn-chip-color` | `#334155` | `#cbd5e1` | Unselected chip text |
+| `--rn-color-{category}` | see `DEFAULT_CATEGORIES` | same | Category color for chips and badges |
+
+If you map these to your own palette, check that `--rn-chip-color` and `--rn-text-muted` keep a 4.5:1 contrast ratio against `--rn-chip-bg` and `--rn-input-bg`.
+
 ### Mobile filter behavior
 
 On narrow screens the category filter chips are hidden behind a "Filter" toggle button that sits next to the version selector. Tapping it expands the chips below the selector row. When any filter is active, the button changes color as a visual indicator.
 
-On screens 768px and wider, the chips are always visible.
+On screens 1024px and wider, the chips are always visible.
 
 ## Custom categories
 
@@ -210,6 +229,24 @@ import { ReleaseNotesSelector } from 'astro-better-release-notes';
   <ReleaseNotesSelector {updates} />
 </div>
 ```
+
+## Accessibility
+
+- Each version is an `<article>` labelled by its `<h2>`. The `<h2>` carries the anchor id (`version-1-2-3`), so fragment links, search crawlers, and TOC tools all resolve to the heading. The `#` permalink sits next to the heading rather than inside it, so the heading's accessible name is only the version.
+- Category filters are native checkboxes inside a `<fieldset>` with a visually hidden `<legend>`. They work with Tab and Space, show a focus ring on the chip, and announce their checked state. Selected chips show a check mark as well as color.
+- Badge and selected-chip text colors are mixed from the category color (darker in light mode, lighter in dark mode), so they stay at or above 4.5:1 for the default categories and for most custom mid-tone colors.
+- The version selector has a label and announces each jump through a polite live region. Focus stays on the selector, because Chrome and Edge on Windows fire `change` on every arrow key press.
+- Transitions and the badge hover scale are disabled under `prefers-reduced-motion: reduce`.
+- The package ships its own `.rn-sr-only` class, so it doesn't depend on a host `sr-only` utility.
+
+## Upgrading to 0.2.2
+
+Anchor URLs are unchanged, but the markup moved:
+
+- The version id moved from `<article class="version">` to its `<h2>`. Update any CSS or scripts that target `article.version[id]` or `.version:target`.
+- `--release-notes-scroll-margin` now applies to the heading instead of the article, which starts slightly higher. If anchored headings land under your sticky header, increase the value (see [Sticky offset and scroll margins](#sticky-offset-and-scroll-margins)).
+- The permalink is now `.version-title .anchor-link`, outside the `<h2>`. Selectors using `.release-note .anchor-link` need updating.
+- The filter container is a `<fieldset>` instead of a `<nav>`, and keeps the `release-notes-filters` id and `filter-controls` class.
 
 ## Dark mode
 

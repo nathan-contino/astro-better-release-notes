@@ -71,6 +71,7 @@ const filterCSS = [
     {showSelector && <ReleaseNotesSelector {updates} />}
 
     <button
+      type="button"
       class="filter-toggle-btn"
       aria-expanded="false"
       aria-controls="release-notes-filters"
@@ -81,14 +82,15 @@ const filterCSS = [
       Filter
     </button>
 
-    <nav id="release-notes-filters" class="filter-controls" aria-label="Filter release notes by category">
+    <fieldset id="release-notes-filters" class="filter-controls">
+      <legend class="rn-sr-only">Show only these categories</legend>
       {categories.map(cat => (
         <label class="filter-chip" style={`--cat-color: ${cat.color}`}>
-          <input type="checkbox" id={`toggle-${cat.id}`} class="filter-input" aria-label={`Show ${cat.label}`} />
-          <span aria-hidden="true">{cat.label}</span>
+          <input type="checkbox" id={`toggle-${cat.id}`} class="filter-input" />
+          {cat.label}
         </label>
       ))}
-    </nav>
+    </fieldset>
 
     <noscript><style>@media (max-width: 1023px) { #release-notes-filters { display: flex !important; flex-wrap: wrap; } .filter-toggle-btn { display: none !important; } }</style></noscript>
   </div>
@@ -98,12 +100,15 @@ const filterCSS = [
       const { Content } = item;
       const versionId = `version-${item.data.version.replaceAll('.', '-')}`;
       return (
-        <article id={versionId} class="version">
+        <article class="version" aria-labelledby={versionId}>
           <header class="version-header">
-            <h2 class="release-note group">
-              Version {item.data.version} {item.data.name && `(${item.data.name})`}
-              <a class="anchor-link" title="copy header link" href={`#${versionId}`} aria-label={`Permalink to version ${item.data.version}`}>#</a>
-            </h2>
+            {/* id on h2 so crawlers resolve anchors; permalink outside h2 keeps the heading name clean */}
+            <div class="version-title">
+              <h2 id={versionId} class="release-note">
+                Version {item.data.version}{item.data.name && ` (${item.data.name})`}
+              </h2>
+              <a class="anchor-link" href={`#${versionId}`} aria-label={`Permalink to version ${item.data.version}`}>#</a>
+            </div>
             <time class="version-date" datetime={item.data.date.toISOString()}>
               {item.data.date.toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })}
             </time>
