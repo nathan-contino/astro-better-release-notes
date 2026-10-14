@@ -13,7 +13,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/better-static-sites/better-static-sites.github.io.git",
-    "directory": "astro-better-release-notes"
+    "directory": "lib/release-notes"
   },
   "homepage": "https://better-static-sites.github.io",
   "bugs": {
